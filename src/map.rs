@@ -1,11 +1,11 @@
 use std::vec::Vec;
-use std::fs::File;
-use std::io::Read;
+use std::path::Path;
+use tiled::parse_file;
 /*
     A map is basically an array of tiles. These tiles are laid out according to a
-    map definition, which is just a csv.
+    map definition, which is in reality just a csv. We use tiled map editor.
     The tiles are defined in the file assets/tiles.png
-    The map definitions are located in assets/<name>.csv
+    The map definitions are located in assets/<name>.tmx
 */
 pub const TILES_FILENAME: &str = "assets/tiles.png";
 pub const TILE_SIZE: u32 = 20;
@@ -18,88 +18,69 @@ pub struct Map {
 
 pub struct Tile {
     description: &'static str,
-    pub id: i32,
+    pub id: u32,
     has_collision: bool
 }
 
 const TILE_FLOOR: Tile = Tile {
     description: "Floor",
-    id: 0,
+    id: 1,
     has_collision: false
 };
 
 const TILE_ROCK: Tile = Tile {
     description: "Rock",
-    id: 1,
+    id: 2,
     has_collision: true
 };
 
 const TILE_VOID: Tile = Tile {
     description: "Void",
-    id: 2,
+    id: 3,
     has_collision: true
 };
 
 const TILE_FIRE: Tile = Tile {
     description: "Fire",
-    id: 3,
+    id: 4,
     has_collision: true
 };
 
-const TILE_NULL: Tile = Tile {
-    description: "WTF",
-    id: -1,
-    has_collision: true
-};
-
-/*
-    This function create a map from the svg file:
-        - loads the svg file
-        - parses length and width
-        - reads the array, and then creates corresponding tile
-        - return the generated map
-*/
 pub fn load_map(def_filename : String) -> Map {
     println!("Reading filename: {}", def_filename);
-    let mut def_file = File::open(def_filename)
-                            .expect("File not found");
+    let def_file = Path::new(&def_filename);
     
-    let mut def_file_contents = String::new();
-    def_file.read_to_string(&mut def_file_contents)
-            .expect("Error while reading contents");
+    let map = parse_file(def_file).unwrap();
+    let ref layer = map.layers[0];
+    let ref definition: Vec<Vec<u32>> = layer.tiles; //layer.tiles is the csv defining the map
 
-    let lines: Vec<&str> = def_file_contents.split("\n").collect();
-
-    //read the first line, which defines dimensions
-    let dimensions: Vec<&str> = lines[0].split(",").collect();
-    let height: usize = dimensions[0].trim().parse().unwrap();
-    let width: usize = dimensions[1].trim().parse().unwrap();
-    println!("Parsed width: {} and height {}", width, height);
-    
+    let width = map.width as usize;
+    let height = map.height as usize;
+    //we have to transform this into our tiles
     let mut width_vec = Vec::with_capacity(width);
-    for i in 1..(width+1) {
+    for i in 0..width {
         let mut height_vec = Vec::with_capacity(height);
-        let line: Vec<&str> = lines[i].split(",").collect();
-        for id in &line {
-            let tile = id_to_tile(id.trim().parse().unwrap());
+        for j in 0..height {
+            let tile = id_to_tile(definition[j][i]);
             height_vec.push(tile);
         }
         width_vec.push(height_vec);
     }
+    println!("Finished parsing the map.");
 
     return Map {
         width: width,
         height: height,
         tiles: width_vec
-    };
+    }
 }
 
-fn id_to_tile(id: i32) -> Tile {
+fn id_to_tile(id: u32) -> Tile {
     match id {
-        0 => { return TILE_FLOOR }
-        1 => { return TILE_ROCK }
-        2 => { return TILE_VOID }
-        3 => { return TILE_FIRE }
-        _ => { return TILE_NULL }
+        1 => { return TILE_FLOOR }
+        2 => { return TILE_ROCK }
+        3 => { return TILE_VOID }
+        4 => { return TILE_FIRE }
+        _ => { return TILE_FLOOR }
     }
 }

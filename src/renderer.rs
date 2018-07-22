@@ -10,7 +10,7 @@ pub struct Renderer {
     pub game_state: game_state::GameState,
     pub gl: GlGraphics,
     tiles_loaded: bool,
-    tiles_mapping: HashMap<i32, Texture>
+    tiles_mapping: HashMap<u32, Texture>
 }
 
 impl Renderer {
@@ -28,9 +28,6 @@ impl Renderer {
         Renderer::render_map(self, args);
     }
 
-    pub fn update(&mut self, args: &UpdateArgs) {
-    }
-
     fn load_tiles(&mut self) {
         if !(self.tiles_loaded) {
             self.tiles_loaded = true;
@@ -44,7 +41,7 @@ impl Renderer {
                     let id = width * j + i;
                     let tile = imageops::crop(tiles_image, i*tz, j*tz, tz, tz).to_image();
                     let texture = Texture::from_image(&tile, &TextureSettings::new());
-                    self.tiles_mapping.insert(id as i32, texture);
+                    self.tiles_mapping.insert(id as u32, texture);
                 }
             }
         }
@@ -61,7 +58,7 @@ impl Renderer {
             for i in 0..map.width {
                 for j in 0..map.height {
                     let tile = &map.tiles[i][j];
-                    let id = tile.id;
+                    let id = tile.id - 1;
                     match tiles_mapping.get(&id) {
                         Some(ref texture) => {
                             let tz = map::TILE_SIZE as f64;
