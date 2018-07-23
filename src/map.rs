@@ -66,7 +66,8 @@ pub fn load_map(def_filename : String) -> Map {
         }
         width_vec.push(height_vec);
     }
-    println!("Finished parsing the map.");
+    println!("Finished parsing map");
+    println!("width is {} and height is {}", width, height);
 
     return Map {
         width: width,

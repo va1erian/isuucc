@@ -8,6 +8,7 @@ extern crate tiled;
 mod map;
 mod game_state;
 mod renderer;
+mod entity;
 
 use glutin_window::GlutinWindow as Window;
 use opengl_graphics::{GlGraphics, OpenGL};
@@ -34,8 +35,11 @@ fn main() {
                                             .build()
                                             .unwrap();
 
+    let map = map::load_map(String::from("assets/map1.tmx"));
+    let isuucc = entity::Isuucc::new(map.width as u32 * map::TILE_SIZE / 2, map.height as u32 * map::TILE_SIZE / 2); //center isuucc to the map
     let game_state = game_state::GameState {
-        current_map: map::load_map(String::from("assets/map1.tmx"))
+        current_map: map,
+        isuucc: isuucc
     };
 
     let mut renderer = renderer::Renderer::new(game_state, GlGraphics::new(opengl));
