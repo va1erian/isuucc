@@ -6,19 +6,18 @@ use opengl_graphics::{GlGraphics, Texture, TextureSettings};
 use piston::input::*;
 use std::collections::HashMap;
 use std::path::Path;
+use std::string::String;
 
-pub struct Renderer<'a> {
-    pub game_state: game_state::GameState<'a>,
+pub struct Renderer {
     pub gl: GlGraphics,
     resources_loaded: bool,
-    sprites: HashMap<&'a str, Texture>,
+    sprites: HashMap<String, Texture>,
     tiles: HashMap<u32, Texture>
 }
 
-impl<'a> Renderer<'a> {
-    pub fn new(game_state: game_state::GameState<'a>, gl: GlGraphics) -> Renderer {
+impl Renderer {
+    pub fn new(gl: GlGraphics) -> Renderer {
         Renderer {
-            game_state: game_state,
             gl: gl,
             resources_loaded: false,
             sprites: HashMap::new(),
@@ -26,13 +25,13 @@ impl<'a> Renderer<'a> {
         }
     }
 
-    pub fn render(&mut self, args: &RenderArgs) {
-        Renderer::load_resources(self);
-        Renderer::render_map(self, args);
-        Renderer::render_isuucc(self, args);
+    pub fn render(&mut self, game_state: &game_state::GameState, args: &RenderArgs) {
+        self.load_resources(game_state);
+        self.render_map(game_state, args);
+        self.render_isuucc(game_state, args);
     }
 
-    fn load_resources(&mut self) {
+    fn load_resources(&mut self, game_state: &game_state::GameState) {
         if !(self.resources_loaded) {
             self.resources_loaded = true;
             let ref mut tiles_image = open(map::TILES_FILENAME).unwrap();
@@ -49,16 +48,16 @@ impl<'a> Renderer<'a> {
                 }
             }
 
-            self.sprites.insert("isuucc", Texture::from_path(&Path::new(self.game_state.isuucc.entity.sprite_filename), &TextureSettings::new()).unwrap());
-            self.sprites.insert("full_heart", Texture::from_path(&Path::new("assets/full_heart.png"), &TextureSettings::new()).unwrap());
-            self.sprites.insert("half_heart", Texture::from_path(&Path::new("assets/half_heart.png"), &TextureSettings::new()).unwrap());
+            self.sprites.insert("isuucc".to_string(), Texture::from_path(&Path::new(&game_state.isuucc.entity.sprite_filename), &TextureSettings::new()).unwrap());
+            self.sprites.insert("full_heart".to_string(), Texture::from_path(&Path::new("assets/full_heart.png"), &TextureSettings::new()).unwrap());
+            self.sprites.insert("half_heart".to_string(), Texture::from_path(&Path::new("assets/half_heart.png"), &TextureSettings::new()).unwrap());
         }
     }
 
-    fn render_map(&mut self, args: &RenderArgs) {
+    fn render_map(&mut self, game_state: &game_state::GameState, args: &RenderArgs) {
         use graphics::*;
 
-        let map = &self.game_state.current_map;
+        let map = &game_state.current_map;
         let tiles = &self.tiles;
         const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
         self.gl.draw(args.viewport(), |c, gl| {
@@ -82,15 +81,15 @@ impl<'a> Renderer<'a> {
         });
     }
 
-    fn render_isuucc(&mut self, args: &RenderArgs) {
+    fn render_isuucc(&mut self, game_state: &game_state::GameState, args: &RenderArgs) {
         use graphics::*;
-        let isuucc = &self.game_state.isuucc;
+        let isuucc = &game_state.isuucc;
         let sprites = &self.sprites;
         self.gl.draw(args.viewport(), |c, gl| {
             //render isuucc sprite
             let isuucc_texture = sprites.get("isuucc").unwrap();
-            let transform = c.transform.trans(isuucc.entity.posX as f64 - isuucc_texture.get_width() as f64 / 2.0, 
-                                              isuucc.entity.posY as f64 - isuucc_texture.get_height() as f64 / 2.0);
+            let transform = c.transform.trans(isuucc.entity.pos_x as f64 - isuucc_texture.get_width() as f64 / 2.0, 
+                                              isuucc.entity.pos_y as f64 - isuucc_texture.get_height() as f64 / 2.0);
             image(isuucc_texture, transform, gl);
 
             //render isuucc hp
@@ -98,19 +97,19 @@ impl<'a> Renderer<'a> {
             let hp = isuucc.hp;
             let full = hp / 2;
             let half = hp % 2;
-            let initPos = map::TILE_SIZE as f64 / 2.0;
+            let init_pos = map::TILE_SIZE as f64 / 2.0;
             for i in 0..full as usize {
                 let texture = sprites.get("full_heart").unwrap();
-                let transform = c.transform.trans(initPos + (i as f64 * map::TILE_SIZE as f64) - (texture.get_width() as f64 / 2.0), 
-                                                  initPos - (texture.get_width() as f64 / 2.0));
+                let transform = c.transform.trans(init_pos + (i as f64 * map::TILE_SIZE as f64) - (texture.get_width() as f64 / 2.0), 
+                                                  init_pos - (texture.get_width() as f64 / 2.0));
                 image(texture, transform, gl);
             }
 
             for i in 0..half as usize {
                 let texture = sprites.get("half_heart").unwrap();
                 let pos = i + full as usize;
-                let transform = c.transform.trans(initPos + (pos as f64 * map::TILE_SIZE as f64) - (texture.get_width() as f64 / 2.0), 
-                                                  initPos - (texture.get_width() as f64 / 2.0));
+                let transform = c.transform.trans(init_pos + (pos as f64 * map::TILE_SIZE as f64) - (texture.get_width() as f64 / 2.0), 
+                                                  init_pos - (texture.get_width() as f64 / 2.0));
                 image(texture, transform, gl);
             }
         });

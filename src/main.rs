@@ -35,19 +35,33 @@ fn main() {
                                             .build()
                                             .unwrap();
 
-    let map = map::load_map(String::from("assets/map1.tmx"));
+    let map = map::load_map("assets/map1.tmx".to_string());
     let isuucc = entity::Isuucc::new(map.width as u32 * map::TILE_SIZE / 2, map.height as u32 * map::TILE_SIZE / 2); //center isuucc to the map
-    let game_state = game_state::GameState {
+    let mut game_state = game_state::GameState {
         current_map: map,
-        isuucc: isuucc
+        isuucc: isuucc,
+        directions: game_state::Directions {
+            move_up: false,
+            move_down: false,
+            move_right: false,
+            move_left: false
+        }
     };
-
-    let mut renderer = renderer::Renderer::new(game_state, GlGraphics::new(opengl));
+    
+    let mut renderer = renderer::Renderer::new(GlGraphics::new(opengl));
 
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
+        if let Some(b) = e.button_args() {
+            game_state.consume_event(&b);
+        }
+
+        if let Some(u) = e.update_args() {
+            game_state.update();
+        }
+
         if let Some(r) = e.render_args() {
-            renderer.render(&r);
+            renderer.render(&game_state, &r);
         }
     }
 }
