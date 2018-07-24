@@ -1,6 +1,7 @@
 use map;
 use game_state;
 
+use graphics::*;
 use image::{open, GenericImage, imageops};
 use opengl_graphics::{GlGraphics, Texture, TextureSettings};
 use piston::input::*;
@@ -25,13 +26,13 @@ impl Renderer {
         }
     }
 
-    pub fn render(&mut self, game_state: &game_state::GameState, args: &RenderArgs) {
+    pub fn render(&mut self, game_state: &mut game_state::GameState, args: &RenderArgs) {
         self.load_resources(game_state);
         self.render_map(game_state, args);
         self.render_isuucc(game_state, args);
     }
 
-    fn load_resources(&mut self, game_state: &game_state::GameState) {
+    fn load_resources(&mut self, game_state: &mut game_state::GameState) {
         if !(self.resources_loaded) {
             self.resources_loaded = true;
             let ref mut tiles_image = open(map::TILES_FILENAME).unwrap();
@@ -48,15 +49,15 @@ impl Renderer {
                 }
             }
 
-            self.sprites.insert("isuucc".to_string(), Texture::from_path(&Path::new(&game_state.isuucc.entity.sprite_filename), &TextureSettings::new()).unwrap());
+            let isuucc_texture = Texture::from_path(&Path::new(&game_state.isuucc.entity.sprite_filename), &TextureSettings::new()).unwrap();
+            game_state.isuucc.entity.init_bounding_box(isuucc_texture.get_width(), isuucc_texture.get_height());
+            self.sprites.insert("isuucc".to_string(), isuucc_texture);
             self.sprites.insert("full_heart".to_string(), Texture::from_path(&Path::new("assets/full_heart.png"), &TextureSettings::new()).unwrap());
             self.sprites.insert("half_heart".to_string(), Texture::from_path(&Path::new("assets/half_heart.png"), &TextureSettings::new()).unwrap());
         }
     }
 
     fn render_map(&mut self, game_state: &game_state::GameState, args: &RenderArgs) {
-        use graphics::*;
-
         let map = &game_state.current_map;
         let tiles = &self.tiles;
         const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
@@ -82,7 +83,6 @@ impl Renderer {
     }
 
     fn render_isuucc(&mut self, game_state: &game_state::GameState, args: &RenderArgs) {
-        use graphics::*;
         let isuucc = &game_state.isuucc;
         let sprites = &self.sprites;
         self.gl.draw(args.viewport(), |c, gl| {

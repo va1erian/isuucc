@@ -16,10 +16,20 @@ pub struct Map {
     pub tiles: Vec<Vec<Tile>> //width x heigth
 }
 
+impl Map {
+    pub fn get_tile_at_coord(&self, pos_x: u32, pos_y: u32) -> &Tile {
+        let tile_x = pos_x / TILE_SIZE;
+        let tile_y = pos_y / TILE_SIZE;
+        return self.tiles.get(tile_x as usize).unwrap()
+                         .get(tile_y as usize).unwrap();
+    }
+}
+
+#[derive(Copy, Clone)]
 pub struct Tile {
     description: &'static str,
     pub id: u32,
-    has_collision: bool
+    pub has_collision: bool
 }
 
 const TILE_FLOOR: Tile = Tile {

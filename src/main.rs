@@ -9,6 +9,7 @@ mod map;
 mod game_state;
 mod renderer;
 mod entity;
+mod collision;
 
 use glutin_window::GlutinWindow as Window;
 use opengl_graphics::{GlGraphics, OpenGL};
@@ -37,10 +38,10 @@ fn main() {
 
     let map = map::load_map("assets/map1.tmx".to_string());
     let isuucc = entity::Isuucc::new(map.width as u32 * map::TILE_SIZE / 2, map.height as u32 * map::TILE_SIZE / 2); //center isuucc to the map
-    let mut game_state = game_state::GameState {
+    let ref mut game_state = game_state::GameState {
         current_map: map,
         isuucc: isuucc,
-        directions: game_state::Directions {
+        direction_event: game_state::DirectionEvent {
             move_up: false,
             move_down: false,
             move_right: false,
@@ -56,12 +57,12 @@ fn main() {
             game_state.consume_event(&b);
         }
 
-        if let Some(u) = e.update_args() {
+        if let Some(_u) = e.update_args() {
             game_state.update();
         }
 
         if let Some(r) = e.render_args() {
-            renderer.render(&game_state, &r);
+            renderer.render(game_state, &r);
         }
     }
 }
