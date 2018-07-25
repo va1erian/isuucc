@@ -19,9 +19,6 @@ impl Entity {
     }
 }
 
-pub trait Attack {
-    fn fire_towards(&mut self, dir: game_state::Direction, fired_tear: &mut Tear);
-}
 
 pub trait Mobile {
     fn move_direction(&mut self, map: &map::Map, dir: game_state::Direction);
@@ -52,7 +49,7 @@ impl Isuucc {
             hp: 6,
             dmg: 1.0,
             speed: 1.0,
-            tear_delay: 1.0
+            tear_delay: 0.001
         }
     }
 }
@@ -86,35 +83,17 @@ impl Mobile for Isuucc {
 
 }
 
-impl Attack for Isuucc {
-    fn fire_towards(&mut self, dir: game_state::Direction, fired_tear: &mut Tear) {
-        // position spawn location of tear depending on where the char wants to attack
-        match dir {
-            game_state::Direction::Up => {
-                fired_tear.entity.pos_x = fired_tear.entity.pos_x + 1;
-            },
-            game_state::Direction::Down => {
-                println!("showing down")
-            },
-            game_state::Direction::Left => {
-                println!("showing left")
-            },
-            game_state::Direction::Right => {
-                println!("showing right")
-            }
-        }
-     
-    }
-}
+
 #[derive(Debug)]
 pub struct Tear {
     pub entity: Entity,
     pub dmg: f32,
     pub speed: f32,
+    pub direction: game_state::Direction
 }
 
 impl Tear {
-    pub fn new(x: u32, y: u32) -> Tear {
+    pub fn new(x: u32, y: u32, dir: game_state::Direction) -> Tear {
         println!("Creating Tear at position ({},{})", x, y);
         return
         Tear {
@@ -126,7 +105,9 @@ impl Tear {
                 sprite_collision: (0, 0) //placeholder until we load the texture
             },
             dmg: 1.0,
-            speed: 1.0
+            speed: 1.0,
+            direction: dir
+
         }
     }
 }

@@ -91,6 +91,6 @@ pub fn collision_map(map: &map::Map, x: i32, y: i32, collision_box: (u32, u32), 
 }
 
 fn is_collision(collisioner: (u32, u32, u32, u32), collisionee: (u32, u32, u32, u32)) -> bool {
-    collisioner.0 < collisionee.2 && collisioner.2 > collisionee.0 &&
-    collisioner.1 < collisionee.3 && collisioner.3 > collisionee.1 
+    collisioner.0 <= collisionee.2 && collisioner.2 >= collisionee.0 &&
+    collisioner.1 <= collisionee.3 && collisioner.3 >= collisionee.1 
 }

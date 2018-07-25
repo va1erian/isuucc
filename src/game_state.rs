@@ -2,7 +2,6 @@ use map;
 use entity;
 
 use entity::Mobile;
-use entity::Attack;
 use piston::input::*;
 use piston::input::ButtonState;
 use piston::input::keyboard::Key;
@@ -83,10 +82,15 @@ impl GameState {
         if self.direction_event.move_left { isuucc.move_direction(map, Direction::Left); }
         if self.direction_event.move_down { isuucc.move_direction(map, Direction::Down); }
         if self.fire_event.firing && self.last_fired > isuucc.tear_delay as f64 {
-            let spawned_tear = entity::Tear::new(isuucc.entity.pos_x,isuucc.entity.pos_y);
-           // isuucc.fire_towards(self.fire_event.fire_direction, &spawned_tear);
-            self.tears.push(spawned_tear);
+            let tear = entity::Tear::new(isuucc.entity.pos_x,isuucc.entity.pos_y,self.fire_event.fire_direction);
+            self.tears.push(tear);
             self.last_fired = 0 as f64;
+        }
+
+        for tear in self.tears.iter_mut() {
+          
+           let mut dir = tear.direction;
+           tear.move_direction(map, dir);
         }
     }
 }
