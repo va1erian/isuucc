@@ -44,10 +44,22 @@ impl GameState {
                     Button::Keyboard(Key::Q) => self.direction_event.move_left = true,
                     Button::Keyboard(Key::S) => self.direction_event.move_down = true,
                     Button::Keyboard(Key::D) => self.direction_event.move_right = true,
-                    Button::Keyboard(Key::Up) => self.arrows_direction_event.move_up = true,
-                    Button::Keyboard(Key::Left) => self.arrows_direction_event.move_left = true,
-                    Button::Keyboard(Key::Down) => self.arrows_direction_event.move_down = true,
-                    Button::Keyboard(Key::Right) => self.arrows_direction_event.move_right = true,
+                    Button::Keyboard(Key::Up) => {self.arrows_direction_event.move_up = true;
+                                                  self.arrows_direction_event.move_left = false;
+                                                  self.arrows_direction_event.move_down = false;
+                                                  self.arrows_direction_event.move_right = false},
+                    Button::Keyboard(Key::Left) => {self.arrows_direction_event.move_up = false;
+                                                  self.arrows_direction_event.move_left = true;
+                                                  self.arrows_direction_event.move_down = false;
+                                                  self.arrows_direction_event.move_right = false},
+                    Button::Keyboard(Key::Down) => {self.arrows_direction_event.move_up = false;
+                                                  self.arrows_direction_event.move_left = false;
+                                                  self.arrows_direction_event.move_down = true;
+                                                  self.arrows_direction_event.move_right = false},
+                    Button::Keyboard(Key::Right) => {self.arrows_direction_event.move_up = false;
+                                                  self.arrows_direction_event.move_left = false;
+                                                  self.arrows_direction_event.move_down = false;
+                                                  self.arrows_direction_event.move_right = true},
                     _ => {}
                 }
             }
@@ -73,19 +85,35 @@ impl GameState {
 
         let ref mut tear = self.tear;
         if self.arrows_direction_event.move_right {
-            if(!tear.visible) { tear.visible = true; }
+            if(!tear.visible) {
+                tear.entity.pos_x = isuucc.entity.pos_x;
+                tear.entity.pos_y = isuucc.entity.pos_y;
+                tear.visible = true;
+            }
             tear.move_direction(map, Direction::Right);
         }
         if self.arrows_direction_event.move_up {
-            if(!tear.visible) { tear.visible = true; }
+            if(!tear.visible) {
+                tear.entity.pos_x = isuucc.entity.pos_x;
+                tear.entity.pos_y = isuucc.entity.pos_y;
+                tear.visible = true;
+            }
             tear.move_direction(map, Direction::Up);
         }
         if self.arrows_direction_event.move_left {
-            if(!tear.visible) { tear.visible = true; };
+            if(!tear.visible) {
+                tear.entity.pos_x = isuucc.entity.pos_x;
+                tear.entity.pos_y = isuucc.entity.pos_y;
+                tear.visible = true;
+            }
             tear.move_direction(map, Direction::Left);
         }
         if self.arrows_direction_event.move_down {
-            if(!tear.visible) { tear.visible = true; }
+            if(!tear.visible) {
+                tear.entity.pos_x = isuucc.entity.pos_x;
+                tear.entity.pos_y = isuucc.entity.pos_y;
+                tear.visible = true;
+            }
             tear.move_direction(map, Direction::Down);
         }
     }
