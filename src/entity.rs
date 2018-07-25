@@ -52,6 +52,37 @@ impl Isuucc {
     }
 }
 
+pub struct Tear {
+    pub entity: Entity,
+    pub speed: f32,
+    pub visible: bool
+}
+
+
+impl Tear {
+    pub fn new(x: u32, y: u32) -> Tear {
+        println!("Creating tear at position ({},{})", x, y);
+        return
+        Tear {
+            entity: Entity {
+                pos_x: x,
+                pos_y: y,
+                facing_direction: 1.0,
+                sprite_filename: "assets/tear.png".to_string(),
+                sprite_collision: (0, 0)
+            },
+            speed: 2.0,
+            visible: false
+        }
+    }
+
+    fn move_direction(&mut self, map: &map::Map, dir: game_state::Direction) {
+        let next_position: (u32, u32) = self.next_position(map, dir); 
+        self.entity.pos_x = next_position.0;
+        self.entity.pos_y = next_position.1;
+    }
+}
+
 impl Mobile for Isuucc {
 
     fn next_position(&self, map: &map::Map, dir: game_state::Direction) -> (u32, u32) {
@@ -77,6 +108,32 @@ impl Mobile for Isuucc {
         if x > self.entity.pos_x { self.move_direction(map, game_state::Direction::Down); }
         if y < self.entity.pos_y { self.move_direction(map, game_state::Direction::Left); }
         if y > self.entity.pos_y { self.move_direction(map, game_state::Direction::Right); }
+    }
+
+}
+
+impl Mobile for Tear {
+
+    fn next_position(&self, map: &map::Map, dir: game_state::Direction) -> (u32, u32) {
+        let mut pos_x = self.entity.pos_x as i32;
+        let mut pos_y = self.entity.pos_y as i32;
+        match dir {
+            game_state::Direction::Up => pos_y = pos_y - self.speed as i32,
+            game_state::Direction::Down => pos_y = pos_y + self.speed as i32,
+            game_state::Direction::Left => pos_x = pos_x - self.speed as i32,
+            game_state::Direction::Right => pos_x = pos_x + self.speed as i32,
+        }
+        collision::collision_map(map, pos_x, pos_y, self.entity.sprite_collision, dir)
+    }
+
+    fn move_direction(&mut self, map: &map::Map, dir: game_state::Direction) {
+        let next_position: (u32, u32) = self.next_position(map, dir); 
+        self.entity.pos_x = next_position.0;
+        self.entity.pos_y = next_position.1;
+    }
+
+    fn move_to(&mut self, map: &map::Map, x: u32, y: u32) {
+
     }
 
 }

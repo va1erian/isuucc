@@ -30,6 +30,7 @@ impl Renderer {
         self.load_resources(game_state);
         self.render_map(game_state, args);
         self.render_isuucc(game_state, args);
+        self.render_tear(game_state, args);
     }
 
     fn load_resources(&mut self, game_state: &mut game_state::GameState) {
@@ -50,10 +51,13 @@ impl Renderer {
             }
 
             let isuucc_texture = Texture::from_path(&Path::new(&game_state.isuucc.entity.sprite_filename), &TextureSettings::new()).unwrap();
+            let tear_texture = Texture::from_path(&Path::new(&game_state.tear.entity.sprite_filename), &TextureSettings::new()).unwrap();
             game_state.isuucc.entity.init_bounding_box(isuucc_texture.get_width(), isuucc_texture.get_height());
             self.sprites.insert("isuucc".to_string(), isuucc_texture);
             self.sprites.insert("full_heart".to_string(), Texture::from_path(&Path::new("assets/full_heart.png"), &TextureSettings::new()).unwrap());
             self.sprites.insert("half_heart".to_string(), Texture::from_path(&Path::new("assets/half_heart.png"), &TextureSettings::new()).unwrap());
+            game_state.tear.entity.init_bounding_box(tear_texture.get_width(), tear_texture.get_height());
+            self.sprites.insert("tear".to_string(), tear_texture);
         }
     }
 
@@ -111,6 +115,20 @@ impl Renderer {
                 let transform = c.transform.trans(init_pos + (pos as f64 * map::TILE_SIZE as f64) - (texture.get_width() as f64 / 2.0), 
                                                   init_pos - (texture.get_width() as f64 / 2.0));
                 image(texture, transform, gl);
+            }
+        });
+    }
+
+    fn render_tear(&mut self, game_state: &game_state::GameState, args: &RenderArgs) {
+        let tear = &game_state.tear;
+        let sprites = &self.sprites;
+        self.gl.draw(args.viewport(), |c, gl| {
+            if(tear.visible) {
+                //render tear sprite
+                let tear_texture = sprites.get("tear").unwrap();
+                let transform = c.transform.trans(tear.entity.pos_x as f64 - tear_texture.get_width() as f64 / 2.0, 
+                                                tear.entity.pos_y as f64 - tear_texture.get_height() as f64 / 2.0);
+                image(tear_texture, transform, gl);
             }
         });
     }

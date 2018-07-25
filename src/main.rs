@@ -38,10 +38,18 @@ fn main() {
 
     let map = map::load_map("assets/map1.tmx".to_string());
     let isuucc = entity::Isuucc::new(map.width as u32 * map::TILE_SIZE / 2, map.height as u32 * map::TILE_SIZE / 2); //center isuucc to the map
+    let tear = entity::Tear::new(isuucc.entity.pos_x, isuucc.entity.pos_y);
     let ref mut game_state = game_state::GameState {
         current_map: map,
         isuucc: isuucc,
+        tear: tear,
         direction_event: game_state::DirectionEvent {
+            move_up: false,
+            move_down: false,
+            move_right: false,
+            move_left: false
+        },
+        arrows_direction_event: game_state::ArrowsDirectionEvent {
             move_up: false,
             move_down: false,
             move_right: false,
