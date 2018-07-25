@@ -30,6 +30,7 @@ impl Renderer {
         self.load_resources(game_state);
         self.render_map(game_state, args);
         self.render_isuucc(game_state, args);
+        self.render_tear(game_state, args);
     }
 
     fn load_resources(&mut self, game_state: &mut game_state::GameState) {
@@ -54,6 +55,7 @@ impl Renderer {
             self.sprites.insert("isuucc".to_string(), isuucc_texture);
             self.sprites.insert("full_heart".to_string(), Texture::from_path(&Path::new("assets/full_heart.png"), &TextureSettings::new()).unwrap());
             self.sprites.insert("half_heart".to_string(), Texture::from_path(&Path::new("assets/half_heart.png"), &TextureSettings::new()).unwrap());
+            self.sprites.insert("tear".to_string(), Texture::from_path(&Path::new("assets/tear.png"), &TextureSettings::new()).unwrap());
         }
     }
 
@@ -113,5 +115,18 @@ impl Renderer {
                 image(texture, transform, gl);
             }
         });
+    }
+    fn render_tear(&mut self, game_state: &game_state::GameState, args: &RenderArgs) {
+        let tears = &game_state.tears;
+        for tear in tears {
+            let sprites = &self.sprites;
+            self.gl.draw(args.viewport(), |c, gl| {
+                //render tear sprite
+                let tear_texture = sprites.get("tear").unwrap();
+                let transform = c.transform.trans(tear.entity.pos_x as f64 - tear_texture.get_width() as f64 / 2.0, 
+                                                tear.entity.pos_y as f64 - tear_texture.get_height() as f64 / 2.0);
+                image(tear_texture, transform, gl);
+            });
+         }
     }
 }

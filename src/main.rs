@@ -46,7 +46,13 @@ fn main() {
             move_down: false,
             move_right: false,
             move_left: false
-        }
+        },
+        fire_event: game_state::FireEvent {
+            fire_direction: game_state::Direction::Down,
+            firing: false
+        },
+        last_fired: 0 as f64,
+        tears: Vec::new()
     };
     
     let mut renderer = renderer::Renderer::new(GlGraphics::new(opengl));
@@ -57,8 +63,8 @@ fn main() {
             game_state.consume_event(&b);
         }
 
-        if let Some(_u) = e.update_args() {
-            game_state.update();
+        if let Some(u) = e.update_args() {
+            game_state.update(u);
         }
 
         if let Some(r) = e.render_args() {
