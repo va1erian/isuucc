@@ -44,22 +44,30 @@ impl GameState {
                     Button::Keyboard(Key::Q) => self.direction_event.move_left = true,
                     Button::Keyboard(Key::S) => self.direction_event.move_down = true,
                     Button::Keyboard(Key::D) => self.direction_event.move_right = true,
-                    Button::Keyboard(Key::Up) => {self.arrows_direction_event.move_up = true;
+                    Button::Keyboard(Key::Up) => {if (self.tear.entity.facing_direction == 0.0 || self.tear.entity.facing_direction == 1.0) {
+                                                  self.arrows_direction_event.move_up = true;
                                                   self.arrows_direction_event.move_left = false;
                                                   self.arrows_direction_event.move_down = false;
-                                                  self.arrows_direction_event.move_right = false},
-                    Button::Keyboard(Key::Left) => {self.arrows_direction_event.move_up = false;
+                                                  self.arrows_direction_event.move_right = false;
+                                                  self.tear.entity.facing_direction = 1.0;}},
+                    Button::Keyboard(Key::Left) => {if (self.tear.entity.facing_direction == 0.0 || self.tear.entity.facing_direction == 2.0) {
+                                                  self.arrows_direction_event.move_up = false;
                                                   self.arrows_direction_event.move_left = true;
                                                   self.arrows_direction_event.move_down = false;
-                                                  self.arrows_direction_event.move_right = false},
-                    Button::Keyboard(Key::Down) => {self.arrows_direction_event.move_up = false;
+                                                  self.arrows_direction_event.move_right = false;
+                                                  self.tear.entity.facing_direction = 2.0;}},
+                    Button::Keyboard(Key::Down) => {if (self.tear.entity.facing_direction == 0.0 || self.tear.entity.facing_direction == 3.0) {
+                                                  self.arrows_direction_event.move_up = false;
                                                   self.arrows_direction_event.move_left = false;
                                                   self.arrows_direction_event.move_down = true;
-                                                  self.arrows_direction_event.move_right = false},
-                    Button::Keyboard(Key::Right) => {self.arrows_direction_event.move_up = false;
+                                                  self.arrows_direction_event.move_right = false;
+                                                  self.tear.entity.facing_direction = 3.0;}},
+                    Button::Keyboard(Key::Right) => {if (self.tear.entity.facing_direction == 0.0 || self.tear.entity.facing_direction == 4.0) {
+                                                   self.arrows_direction_event.move_up = false;
                                                   self.arrows_direction_event.move_left = false;
                                                   self.arrows_direction_event.move_down = false;
-                                                  self.arrows_direction_event.move_right = true},
+                                                  self.arrows_direction_event.move_right = true;
+                                                  self.tear.entity.facing_direction = 4.0;}},
                     _ => {}
                 }
             }
@@ -75,7 +83,7 @@ impl GameState {
         }
     }
 
-    pub fn update(& mut self) {
+    pub fn update(&mut self) {
         let ref mut isuucc = self.isuucc;
         let map = &self.current_map;
         if self.direction_event.move_right { isuucc.move_direction(map, Direction::Right); }
@@ -84,37 +92,43 @@ impl GameState {
         if self.direction_event.move_down { isuucc.move_direction(map, Direction::Down); }
 
         let ref mut tear = self.tear;
-        if self.arrows_direction_event.move_right {
-            if(!tear.visible) {
+        if(self.arrows_direction_event.move_right) { 
+            if(!tear.entity.visible && tear.entity.facing_direction == 4.0) {
                 tear.entity.pos_x = isuucc.entity.pos_x;
                 tear.entity.pos_y = isuucc.entity.pos_y;
-                tear.visible = true;
+                tear.entity.visible = true;
             }
             tear.move_direction(map, Direction::Right);
         }
-        if self.arrows_direction_event.move_up {
-            if(!tear.visible) {
+        if(self.arrows_direction_event.move_up) {
+            if(!tear.entity.visible && tear.entity.facing_direction == 1.0) {
                 tear.entity.pos_x = isuucc.entity.pos_x;
                 tear.entity.pos_y = isuucc.entity.pos_y;
-                tear.visible = true;
+                tear.entity.visible = true;
             }
             tear.move_direction(map, Direction::Up);
         }
-        if self.arrows_direction_event.move_left {
-            if(!tear.visible) {
+        if(self.arrows_direction_event.move_left ) {
+            if(!tear.entity.visible && tear.entity.facing_direction == 2.0) {
                 tear.entity.pos_x = isuucc.entity.pos_x;
                 tear.entity.pos_y = isuucc.entity.pos_y;
-                tear.visible = true;
+                tear.entity.visible = true;
             }
             tear.move_direction(map, Direction::Left);
         }
-        if self.arrows_direction_event.move_down {
-            if(!tear.visible) {
+        if(self.arrows_direction_event.move_down) {
+            if(!tear.entity.visible && tear.entity.facing_direction == 3.0) {
                 tear.entity.pos_x = isuucc.entity.pos_x;
                 tear.entity.pos_y = isuucc.entity.pos_y;
-                tear.visible = true;
+                tear.entity.visible = true;
             }
             tear.move_direction(map, Direction::Down);
         }
+
+        if(tear.entity.has_collision) {
+            tear.entity.visible = false;
+            tear.entity.facing_direction = 0.0;
+        }
+
     }
 }

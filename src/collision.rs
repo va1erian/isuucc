@@ -1,10 +1,13 @@
 use map;
 use game_state;
+use entity;
 
-pub fn collision_map(map: &map::Map, x: i32, y: i32, collision_box: (u32, u32), dir: game_state::Direction) -> (u32, u32) {
+pub fn collision_map(map: &map::Map, x: i32, y: i32, entity: &mut entity::Entity, dir: game_state::Direction) -> (u32, u32, bool) {
     let tz = map::TILE_SIZE;
     let mut new_x: u32;
     let mut new_y: u32;
+    let mut has_collision = false;
+    let collision_box = entity.sprite_collision;
     let w = collision_box.0 / 2;
     let h = collision_box.1 / 2;
 
@@ -40,6 +43,7 @@ pub fn collision_map(map: &map::Map, x: i32, y: i32, collision_box: (u32, u32), 
                 let tile = &map.get_tile_at_coord(i, tile_y);
                 if tile.has_collision && is_collision(collision_box, tile_box) {  
                     new_y = tile_y + tz + h;
+                    has_collision = true;
                 }
                 i += tz;
             }
@@ -54,6 +58,7 @@ pub fn collision_map(map: &map::Map, x: i32, y: i32, collision_box: (u32, u32), 
                 let tile = &map.get_tile_at_coord(tile_x, i);
                 if tile.has_collision && is_collision(collision_box, tile_box) {
                     new_x = tile_x - w;
+                    has_collision = true;
                 }
                 i += tz;
             }
@@ -68,6 +73,7 @@ pub fn collision_map(map: &map::Map, x: i32, y: i32, collision_box: (u32, u32), 
                 let tile = &map.get_tile_at_coord(i, tile_y);
                 if tile.has_collision && is_collision(collision_box, tile_box) {
                     new_y = tile_y - h;
+                    has_collision = true;
                 }
                 i += tz;
             }
@@ -82,12 +88,13 @@ pub fn collision_map(map: &map::Map, x: i32, y: i32, collision_box: (u32, u32), 
                 let tile = &map.get_tile_at_coord(tile_x, i);
                 if tile.has_collision && is_collision(collision_box, tile_box) {
                     new_x = tile_x + tz + w;
+                    has_collision = true;
                 }
                 i += tz;
             }
         }
     }
-    (new_x, new_y)
+    (new_x, new_y, has_collision)
 }
 
 fn is_collision(collisioner: (u32, u32, u32, u32), collisionee: (u32, u32, u32, u32)) -> bool {

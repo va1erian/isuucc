@@ -123,7 +123,7 @@ impl Renderer {
         let tear = &game_state.tear;
         let sprites = &self.sprites;
         self.gl.draw(args.viewport(), |c, gl| {
-            if(tear.visible) {
+            if(tear.entity.visible) {
                 //render tear sprite
                 let tear_texture = sprites.get("tear").unwrap();
                 let transform = c.transform.trans(tear.entity.pos_x as f64 - tear_texture.get_width() as f64 / 2.0, 
