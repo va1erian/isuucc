@@ -7,6 +7,8 @@ use bincode::{serialize, deserialize};
 
 use input::Input;
 
+const BUFFER_SIZE: usize = 32768;
+
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ServerMessage {
     SpawnEntity,
@@ -16,6 +18,7 @@ pub enum ServerMessage {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ClientMessage {
+    Hello,
     CommandInput(Input),
     Say
 }
@@ -39,23 +42,22 @@ impl NetChanServer {
 
         let thread = spawn(move || {
             println!("Command Server Thread started");
-            let mut buf = [0; 2048];
+            let mut buf = [0; BUFFER_SIZE];
+
+            let txClient = txClient;
 
             loop {
                 match socket.recv_from(&mut buf) {
                     Ok((amt, src)) => {
-                        spawn(move || {
-                            println!("amt: {}", amt);
-                            println!("src: {}", src);
-                            println!("{}", str::from_utf8(&buf).unwrap_or(""));
-                        });
+                        println!("amt: {}", amt);
+                        println!("src: {}", src);
+                        let msg : ClientMessage = deserialize(&buf).unwrap();
+                        println!("{:?}", msg);
                     },
                     Err(e) => {
                         println!("couldn't receive a datagram: {}", e);
                     }
                 }
-
-                txClient.send(ClientMessage::Say);
             }
         });
 
@@ -75,8 +77,8 @@ impl NetChan {
         let (txClient, rxClient) = channel::<ClientMessage>();
         let thread = spawn(move || {
             println!("Command client Thread started");
-            let mut buf = [0; 2048];
-
+            let mut buf = [0; BUFFER_SIZE];
+            
             loop {
                 let msg = rxClient.recv().unwrap();
                 let serialized = serialize(&msg).unwrap();

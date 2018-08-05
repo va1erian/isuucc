@@ -53,8 +53,12 @@ fn server() {
     let (tx, rx) = server.channel;
 
     loop {
-        let msg = rx.recv();
-        println!("{:?}", msg);
+        let maybe_msg = rx.recv();
+        if let Ok(msg) = maybe_msg {
+            println!("{:?}", msg)
+        } else {
+            println!("recv error");
+        }
     }
 }
 
