@@ -1,53 +1,50 @@
-extern crate piston;
-extern crate glutin_window;
 #[macro_use]
 extern crate serde_derive;
 extern crate bincode;
+extern crate ggez;
+extern crate tiled;
 
 mod net;
 mod input;
+mod engine;
 
+use engine::GameEngine;
 use std::env;
-
-use piston::window::*;
-use piston::event_loop::*;
-use piston::input::*;
-use glutin_window::GlutinWindow as Window;
-
+use ggez::{Context, ContextBuilder, event};
+use ggez::conf;
+use std::path;
 
 fn client(addr : &String) {
     let client = net::NetChan::new(addr).expect("failed to connect netchannel client");
+    let mut ctx = init_context();
+    let mut engine = GameEngine::new();
 
-    let mut window: Window = WindowSettings::new("Client input test", [640, 480])
-        .exit_on_esc(true)
-        .build()
-        .unwrap();
-
-    let mut events = Events::new(EventSettings::new());
-    let (tx, rx) = client.channel;
-
-    while let Some(e) = events.next(&mut window) {
-        if let Some(u) = e.button_args(){
-            use piston::input::Button::Keyboard;
-            use piston::input::keyboard::Key;
-            println!("{:?}", u);
-
-            match u {
-                ButtonArgs{button: Keyboard(x), ..} => {
-                    match x {
-                        Key::Left => tx.send(net::ClientMessage::CommandInput(input::Input::Left)).unwrap(),
-                        Key::Right => tx.send(net::ClientMessage::CommandInput(input::Input::Right)).unwrap(),
-                        Key::Up => tx.send(net::ClientMessage::CommandInput(input::Input::Up)).unwrap(),
-                        Key::Down => tx.send(net::ClientMessage::CommandInput(input::Input::Down)).unwrap(),
-                        _ => {}
-                    }
-                }
-                _ => {}
-            }
-        }
+    let result = event::run(&mut ctx, &mut engine);
+    if let Err(e) = result {
+        println!("Error encountered running game: {}", e);
+    } else {
+        println!("Game exited cleanly.");
     }
 }
 
+fn init_context() -> Context {
+    let mut cb = ContextBuilder::new("isuucc", "ggez")
+        .window_setup(conf::WindowSetup::default().title("Blunder of isuucc"))
+        .window_mode(conf::WindowMode::default().dimensions(640, 480));
+
+    // We add the CARGO_MANIFEST_DIR/resources to the filesystems paths so
+    // we we look in the cargo project for files.
+    if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
+        let mut path = path::PathBuf::from(manifest_dir);
+        path.push("resources");
+        println!("Adding path {:?}", path);
+        cb = cb.add_resource_path(path);
+    } else {
+        println!("Not building from cargo?  Ok.");
+    }
+
+    cb.build().unwrap()
+}
 fn server() {
     let server = net::NetChanServer::new().expect("failed to start netchannel server");
     let (tx, rx) = server.channel;
