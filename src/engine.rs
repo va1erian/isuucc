@@ -3,49 +3,90 @@ use ggez::event::{self, Keycode, Mod};
 use ggez::graphics;
 use net::NetChan;
 use std::collections::{LinkedList, HashMap};
-use std::string;
-use tiled;
 
 pub trait Entity {
-  fn think(&self, dt : f32, Context : &mut Context);
-  fn draw(&self,  Context: &mut Context);
+  fn think(&self, dt : f32, context : &mut Context);
+  fn draw(&self, context: &mut Context);
+}
+
+pub trait State {
+  fn update(&self, dt : f32, context : &mut Context);
+  fn render(&self, context: &mut Context);
+  fn load_resources(&self) -> Option<Resources>;
+}
+
+pub struct NullState;
+
+impl State for NullState {
+  
+  fn update(&self, dt : f32, context : &mut Context) {}
+
+  fn render(&self, context: &mut Context) {}
+
+  fn load_resources(&self) -> Option<Resources> {
+    None
+  }
 }
 
 pub struct GameEngine {
-  state : Option<Box<dyn Entity>>
+  state : Box<dyn State>,
+  resources: Resources
 }
 
-struct Resources {
+pub struct Resources {
   textures: HashMap<String, graphics::Image>
+}
+
+impl Resources {
+  fn new() -> Resources {
+    Resources {
+      textures: HashMap::new()
+    }
+  }
 }
 
 struct GameState {
   channel : NetChan,
-  level: tiled::Map,
   entities: LinkedList<Box<dyn Entity>>
 }
 
 impl GameState {
-  fn load_resources() -> Resources {
-    let map = HashMap::new();
-    
-
-
-    Resources {
-      textures: map
+  fn new(channel : NetChan, level_name : String) -> GameState {
+    GameState {
+      channel: channel,
+      entities: LinkedList::new()
     }
+  }
+}
+
+impl State for GameState {
+
+  fn update(&self, dt : f32, context : &mut Context) {
+
+  }
+
+  fn render(&self, context: &mut Context) {
+
+  }
+
+  fn load_resources(&self) -> Option<Resources> {
+    let mut res = Resources::new();
+
+    Some(res)
   }
 }
 
 impl GameEngine { 
   pub fn new() -> GameEngine {
     GameEngine {
-      state: None,
+      state: Box::new(NullState{}),
+      resources : Resources::new()
     }
   }
 
-  pub fn to_game() {
-
+  pub fn to_game(&mut self, channel : NetChan, level: String) {
+    let game_state = GameState::new(channel, level);
+    self.state = Box::new(game_state);
   }
 }
 
@@ -54,17 +95,13 @@ impl event::EventHandler for GameEngine {
       const DESIRED_FPS: u32 = 60;
 
       while timer::check_update_time(ctx, DESIRED_FPS) {
-        if let Some(ref state) =  self.state {
-          state.think(1.0, ctx);
-        }
+          self.state.update(1.0, ctx);
       }
       Ok(())
   }
 
   fn draw(&mut self, ctx : &mut Context) -> GameResult<()> {
-      if let Some(ref state) =  self.state {
-          state.draw(ctx);
-      }
+    self.state.render(ctx);
     Ok(())
   }
 
