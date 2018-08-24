@@ -21,7 +21,7 @@ pub struct Input {
 }
 
 impl Input {
-  fn new() -> Input {
+  pub fn new() -> Input {
     Input {
       up: false,
       down: false,

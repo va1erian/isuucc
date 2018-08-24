@@ -3,7 +3,7 @@ use ggez::event::{self, Keycode, Mod};
 use ggez::graphics;
 use net::NetChan;
 use std::collections::{LinkedList, HashMap};
-
+use input::Input;
 pub trait Entity {
   fn think(&self, dt : f32, context : &mut Context);
   fn draw(&self, context: &mut Context);
@@ -30,7 +30,8 @@ impl State for NullState {
 
 pub struct GameEngine {
   state : Box<dyn State>,
-  resources: Resources
+  resources: Resources,
+  input: Input
 }
 
 pub struct Resources {
@@ -80,7 +81,8 @@ impl GameEngine {
   pub fn new() -> GameEngine {
     GameEngine {
       state: Box::new(NullState{}),
-      resources : Resources::new()
+      resources : Resources::new(),
+      input : Input::new()
     }
   }
 
@@ -113,21 +115,9 @@ impl event::EventHandler for GameEngine {
   }
 
   fn key_up_event(&mut self, _ctx: &mut Context, keycode: Keycode, keymod: Mod, repeat: bool) {
-        println!(
-            "Key released: {:?}, modifier {:?}, repeat: {}",
-            keycode, keymod, repeat
-        );
-  }
-
-
-}
-
-impl Entity for GameState {
-  fn think(&self, dt : f32, Context : &mut Context){
-
-  }
-
-
-  fn draw(&self, Context: &mut Context,) {
+    println!(
+        "Key released: {:?}, modifier {:?}, repeat: {}",
+        keycode, keymod, repeat
+    );
   }
 }

@@ -7,7 +7,7 @@ extern crate tiled;
 mod net;
 mod input;
 mod engine;
-
+mod gfx;
 use engine::GameEngine;
 use std::env;
 use ggez::{Context, ContextBuilder, event};
