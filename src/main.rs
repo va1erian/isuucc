@@ -8,6 +8,7 @@ mod net;
 mod input;
 mod engine;
 mod gfx;
+mod game_state;
 use engine::GameEngine;
 use std::env;
 use ggez::{Context, ContextBuilder, event};
@@ -19,12 +20,14 @@ fn client(addr : &String) {
     let mut ctx = init_context();
     let mut engine = GameEngine::new();
 
+    engine.to_game(client, "level1".to_owned());
     let result = event::run(&mut ctx, &mut engine);
     if let Err(e) = result {
         println!("Error encountered running game: {}", e);
     } else {
         println!("Game exited cleanly.");
     }
+
 }
 
 fn init_context() -> Context {
